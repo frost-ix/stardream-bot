@@ -41,7 +41,7 @@ function convertName(name: string) : string | null {
     }
 }
 
-export default {
+module.exports = {
   data: new SlashCommandBuilder()
     .setName('상태')
     .setDescription('멤버의 방송 상태를 확인합니다. (한번 누르면 5분마다 자동보고, 다시 누르면 중지)')

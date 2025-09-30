@@ -1,7 +1,7 @@
 // 여기서 nChzzk.ts의 사용 방법을 알려주는 slash command를 구현합니다.
 import { Interaction, SlashCommandBuilder } from "discord.js";
 
-export default {
+module.exports = {
   data: new SlashCommandBuilder()
     .setName("사용방법")
     .setDescription("스티드림 봇 사용 방법을 안내합니다.")

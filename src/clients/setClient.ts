@@ -1,8 +1,10 @@
-import { Events, GatewayIntentBits, Partials } from "discord.js";
+import { Events, GatewayIntentBits, Partials, REST, Routes } from "discord.js";
 import { fileURLToPath } from "node:url";
 import { CustomClient, Command } from "../types/customClient.js";
 import fs from "node:fs";
 import path from "node:path";
+
+// --- 클라이언트 설정 ---
 
 const client = new CustomClient({
   intents: [
@@ -10,7 +12,7 @@ const client = new CustomClient({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent, // 메시지 내용을 읽기 위해 필요합니다.
   ],
-  partials: [Partials.Channel],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 // --- 동적 명령어 로딩 ---
@@ -30,11 +32,11 @@ for (const file of commandFiles) {
   // import()를 사용하여 ES 모듈을 비동기적으로 가져옵니다.
   import(filePath).then((commandModule) => {
     const command: Command = commandModule.default;
-    console.log(`Loading command from file: ${file}`);
-    console.log(`Command name: ${command.data.name}`);
     // 명령어가 유효한지 확인합니다.
-    client.commands.set(command.data.name, command);
     if (command && "data" in command && "execute" in command) {
+      console.log(`Loading command from file: ${file}`);
+      console.log(`Command name: ${command.data.name}`);
+      client.commands.set(command.data.name, command);
     } else {
       console.log(
         `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
@@ -42,6 +44,37 @@ for (const file of commandFiles) {
     }
   });
 }
+
+// -- Discord에 commands 등록 ---
+const rest = new REST().setToken(process.env.DISCORD_TOKEN || "");
+
+(async () => {
+  try {
+    console.log("Started refreshing application (/) commands.");
+
+    // client.commands가 비동기적으로 로드되므로, 약간의 지연을 줍니다.
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    const commandData = Array.from(client.commands.values()).map((cmd) =>
+      cmd.data.toJSON()
+    ) as [];
+
+    if (commandData.length === 0) {
+      console.log("No commands to register.");
+      return;
+    }
+
+    await rest.put(Routes.applicationCommands(process.env.CLIENT_ID || ""), {
+      body: commandData,
+    });
+
+    console.log(
+      `Successfully reloaded ${commandData.length} application (/) commands.`
+    );
+  } catch (error) {
+    console.error("Error registering commands:", error);
+  }
+})();
 
 // --- 이벤트 핸들러 ---
 client.on(Events.ClientReady, () => {
@@ -52,7 +85,7 @@ client.on(Events.Error, (error) => {
   console.error("The client encountered an error:", error);
 });
 
-// 클라이언트가 준비되었을 때 한 번만 실행됩니다.
+// discord 서버와 slashCommand 상호작용 처리
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
