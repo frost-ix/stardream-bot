@@ -1,8 +1,15 @@
-import { Events, GatewayIntentBits, Partials } from 'discord.js';
+import {
+    ChannelType,
+    Events,
+    GatewayIntentBits,
+    GuildBasedChannel,
+    Partials,
+} from 'discord.js';
 import { fileURLToPath } from 'node:url';
 import { CustomClient, Command } from '../types/customClient.js';
 import fs from 'node:fs';
 import path from 'node:path';
+import { findWelcomeChannel } from '../functions/general.js';
 
 // --- 클라이언트 설정 ---
 
@@ -53,6 +60,27 @@ client.on(Events.ClientReady, () => {
 client.on(Events.Error, (error) => {
     console.error('The client encountered an error:', error);
 });
+
+// 봇이 서버에 처음 추가 됐을 때
+client.on('guildCreate', (guild) => {
+    const welcomeChannel = findWelcomeChannel(guild);
+
+    if (welcomeChannel && welcomeChannel.isTextBased()) {
+        welcomeChannel
+            .send(
+                '안녕하세요! 추가해주셔서 감사합니다.\n' +
+                    '잘 부탁드립니다! 🚀\n\n' +
+                    '봇 사용 방법은 **`/사용방법`** 명령어를 통해 확인하실 수 있습니다.'
+            )
+            .catch(console.error);
+    } else {
+        console.log(
+            `Could not find a suitable channel to send a welcome message in ${guild.name}.`
+        );
+    }
+});
+
+// --- 상호작용 핸들러 ---
 
 // discord 서버와 slashCommand 상호작용 처리
 client.on(Events.InteractionCreate, async (interaction) => {

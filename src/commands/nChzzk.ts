@@ -110,7 +110,7 @@ module.exports = {
               const liveStatus = await checkChannelStatus(id); // 'on' | 'off'
               const prev = lastStatusMap.get(memberKeyFull);
               if (prev !== liveStatus) {
-                await channel.send(isOn(id, name, liveStatus));
+                await channel.send('@' + interaction.user + ' \n' + isOn(id, name, liveStatus));
                 lastStatusMap.set(memberKeyFull, liveStatus);
               }
             } catch (error) {

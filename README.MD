@@ -2,6 +2,8 @@
 
 > ### ❗주의 : **비공식 api를 사용합니다.**
 
+[봇 추가하기](https://discord.com/oauth2/authorize?client_id=1422069057087078482&permissions=1125902054475776&integration_type=0&scope=bot+applications.commands)
+
 ### 사용 스택
 
 <table>
