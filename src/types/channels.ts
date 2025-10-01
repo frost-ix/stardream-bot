@@ -15,6 +15,13 @@ interface SubscriptionPaymentAvailability {
 
 /**
  * 채널 정보 타입 지정
+ * - liveId: 라이브 ID
+ * - liveTitle: 라이브 제목
+ * - status: 라이브 상태
+ * - liveImageUrl: 라이브 이미지 URL
+ * - defaultThumbnailImageUrl: 기본 썸네일 이미지 URL
+ * - openDate: 오픈 날짜
+ * - liveCategory: 라이브 카테고리
  * - channelId: 채널 ID
  * - channelName: 채널 이름
  * - channelImageUrl: 채널 이미지 URL
@@ -26,16 +33,26 @@ interface SubscriptionPaymentAvailability {
  * - subscriptionAvailability: 구독 가능 여부 객체
  */
 interface ChannelContent {
+    liveId: string;
+    liveTitle: string;
+    status: string;
+    liveImageUrl: string | null;
+    defaultThumbnailImageUrl: string | null;
+    openDate: string;
+    liveCategory: string;
+    channel: channelInfo;
+}
+
+/**
+ * 채널 정보 타입 지정
+ * - channelId: 채널 ID
+ * - channelName: 채널 이름
+ * - channelImageUrl: 채널 이미지 URL
+ */
+interface channelInfo {
     channelId: string;
     channelName: string;
     channelImageUrl: string;
-    verifiedMark: boolean;
-    channelType: string;
-    channelDescription: string;
-    followerCount: number;
-    openLive: boolean;
-    subscriptionAvailability: boolean;
-    subscriptionPaymentAvailability: SubscriptionPaymentAvailability;
 }
 
 /**
@@ -50,4 +67,9 @@ interface ApiResponse {
     content: ChannelContent;
 }
 
-export type { ApiResponse, ChannelContent, SubscriptionPaymentAvailability };
+export type {
+    ApiResponse,
+    ChannelContent,
+    channelInfo,
+    SubscriptionPaymentAvailability,
+};
