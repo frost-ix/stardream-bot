@@ -97,7 +97,7 @@ module.exports = {
           const prev = lastStatusMap.get(key);
           if (prev !== liveStatus) {
             // 상태 변화가 있을 때만 전송
-            await channel.send(isOn(streamerInfo.id, streamerInfo.name, liveStatus));
+            await channel.send('@' + interaction.user + ' \n' + isOn(streamerInfo.id, streamerInfo.name, liveStatus));
             lastStatusMap.set(key, liveStatus);
           }
         } else {
