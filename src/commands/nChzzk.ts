@@ -1,64 +1,8 @@
 import { EmbedBuilder, Interaction, SlashCommandBuilder, TextChannel } from 'discord.js';
-import { header, pollingHeader } from '../config/header.js';
-import axios from 'axios';
-import streamers from '../data/streamers.json' with { type: 'json' };
 import { CustomClient } from '../types/customClient.js';
-import { ApiResponse, ChannelContent, channelInfo } from '../types/channels.js';
-
-type StreamerKey = keyof typeof streamers.stardream;
-const CHZZK_CHANNELS_API_URL = `${process.env.CHZZK_API_PATH}/channels/`;
-
-async function checkChannelStatus(channelId: string) : Promise<string> {
-  try {
-    const response = await axios.get<ApiResponse>(`${CHZZK_CHANNELS_API_URL}${channelId}/live-detail`, {
-      headers: header,
-    });
-    return response.data.content.status;
-  } catch (error) {
-    console.error(`Error fetching channel status for ${channelId}:`, error);
-    throw error;
-  }
-}
-
-async function checkChannelInformation(channelId: string): Promise<ApiResponse> {
-  try {
-    const response = await axios.get<ApiResponse>(`${CHZZK_CHANNELS_API_URL}/${channelId}/live-detail`, {
-      headers: pollingHeader,
-    });
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching channel information for ${channelId}:`, error);
-    throw error;
-  }
-}
-
-function isOn(channelId: string, memberName: string, liveStatus: string) : string{
-  if (liveStatus === 'OPEN') {
-    const streamerUrl = `https://chzzk.naver.com/live/${channelId}`;
-    return `🟢 **[${memberName}]** 님은 현재 **방송 중**입니다!\n${streamerUrl}`;
-  } else {
-    return `🔴 **[${memberName}]** 님은 현재 **방송 종료 상태**입니다.`;
-  }
-}
-
-function convertName(name: string) : StreamerKey | null {
-    switch (name) {
-      case '루네':
-      case '이루네':
-            return 'irn';
-      case '하얀':
-      case '온하얀':
-            return 'ohy';
-      case '레이':
-      case '유레이':
-            return 'uri';
-      case '나빈':
-      case '하나빈':
-            return 'hnv';
-      default:
-            return null;
-    }
-}
+import { ChannelContent, channelInfo } from '../types/channels.js';
+import { checkChannelStatus, checkChannelInformation, isOn, convertName, StreamerKey } from '../functions/nChzzkFunction.js';
+import streamers from '../data/streamers.json' with { type: 'json' };
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -134,7 +78,6 @@ module.exports = {
                 } else {
                   await channel.send(isOn(streamerInfo.id, streamerInfo.name, liveStatus) + '\n');
                 }
-                console.log('Status changed:', streamerInfo.name, prev, '->', liveStatus);
                 // 상태 변화가 있을 때만 전송
                 lastStatusMap.set(key, liveStatus);
                 return;
@@ -144,7 +87,6 @@ module.exports = {
             // 전체 멤버 체크
             const streamerGroup = JSON.parse(JSON.stringify(streamers.stardream));
             for (const memberKey in streamerGroup) {
-              console.log('Checking status for memberKey:', memberKey);
               const { id, name } = streamerGroup[memberKey];
               const memberKeyFull = key + memberKey;
               try {
@@ -161,7 +103,6 @@ module.exports = {
                 }
                 const prev = lastStatusMap.get(memberKeyFull);
                 if (prev !== liveStatus) {
-                  console.log('Status changed:', name, prev, '->', liveStatus);
                   // 상태 변화가 있을 때만 전송
                   if (liveStatus === 'OPEN') {
                     const embedLive = new EmbedBuilder()
