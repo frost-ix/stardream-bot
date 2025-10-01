@@ -14,6 +14,7 @@ module.exports = {
   // execute(interaction, client) 형태로 client를 받습니다.
   async execute(interaction: Interaction, client: CustomClient) {
     if (!interaction.isChatInputCommand()) return;
+    await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
 
     const key = (interaction.guildId ?? interaction.channelId) + (interaction.options.getString('이름') || 'ALL');
     if (!client.backgroundIntervals) client.backgroundIntervals = new Map() as Map<string, NodeJS.Timeout>;
