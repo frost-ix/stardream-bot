@@ -4,13 +4,7 @@ import { Interaction, SlashCommandBuilder } from 'discord.js';
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('사용방법')
-        .setDescription('스티드림 봇 사용 방법을 안내합니다.')
-        .addStringOption((option) =>
-            option
-                .setName('option')
-                .setDescription('옵션입니다.')
-                .setRequired(false)
-        ),
+        .setDescription('스티드림 봇 사용 방법을 안내합니다.'),
     async execute(interaction: Interaction, client) {
         if (!interaction.isChatInputCommand()) return;
         await interaction.reply(

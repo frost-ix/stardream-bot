@@ -5,7 +5,7 @@ import axios from 'axios';
 // 치지직 세션연결을 한 뒤 채팅 메시지를 조회 하는 슬래시 커맨드를 구현
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('세션연결 -- 공사중')
+        .setName('공사중')
         .setDescription('치지직 세션 연결을 시도합니다.'),
     async execute(interaction: Interaction, client) {
         if (!interaction.isChatInputCommand()) return;
