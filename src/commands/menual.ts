@@ -5,7 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('사용방법')
         .setDescription('스티드림 봇 사용 방법을 안내합니다.'),
-    async execute(interaction: Interaction, client) {
+    async execute(interaction: Interaction) {
         if (!interaction.isChatInputCommand()) return;
         await interaction.reply(
             '# 안녕하세요 ! 스타드림 봇 입니다.' +

@@ -8,7 +8,7 @@ const startBot = async () => {
     try {
         console.log('Starting bot...\n', DISCORD_TOKEN);
         await client.login(DISCORD_TOKEN);
-        await client.rest.put(Routes.applicationCommands(client.user.id), {
+        await client.rest.put(Routes.applicationCommands(client.user!.id), {
             body: client.commands.map((command) => command.data.toJSON()),
         });
         console.log('Bot is online and commands are registered.');

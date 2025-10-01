@@ -7,7 +7,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('공사중')
         .setDescription('치지직 세션 연결을 시도합니다.'),
-    async execute(interaction: Interaction, client) {
+    async execute(interaction: Interaction) {
         if (!interaction.isChatInputCommand()) return;
         await interaction.reply('치지직 세션 연결을 시도합니다...');
 

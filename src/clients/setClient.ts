@@ -1,10 +1,4 @@
-import {
-    ChannelType,
-    Events,
-    GatewayIntentBits,
-    GuildBasedChannel,
-    Partials,
-} from 'discord.js';
+import { Events, GatewayIntentBits, Partials } from 'discord.js';
 import { fileURLToPath } from 'node:url';
 import { CustomClient, Command } from '../types/customClient.js';
 import fs from 'node:fs';
@@ -54,7 +48,7 @@ for (const file of commandFiles) {
 
 // --- 이벤트 핸들러 ---
 client.on(Events.ClientReady, () => {
-    console.log(`Logged in as ${client.user.tag}!`);
+    console.log(`Logged in as ${client.user!.tag}!`);
 });
 
 client.on(Events.Error, (error) => {
@@ -64,11 +58,12 @@ client.on(Events.Error, (error) => {
 // 봇이 서버에 처음 추가 됐을 때
 client.on('guildCreate', (guild) => {
     const welcomeChannel = findWelcomeChannel(guild);
+    console.log(`Joined a new guild: ${guild.name} (id: ${guild.id})`);
 
     if (welcomeChannel && welcomeChannel.isTextBased()) {
         welcomeChannel
             .send(
-                '안녕하세요! 추가해주셔서 감사합니다.\n' +
+                '안녕하세요! 스타드림 뱅온 알리미 봇 입니다.\n' +
                     '잘 부탁드립니다! 🚀\n\n' +
                     '봇 사용 방법은 **`/사용방법`** 명령어를 통해 확인하실 수 있습니다.'
             )
@@ -100,7 +95,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     try {
-        // execute 시 client를 같이 전달합니다.
         await command.execute(interaction, client);
     } catch (error) {
         console.error('Error executing command:', error);

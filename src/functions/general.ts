@@ -1,7 +1,7 @@
-import { ChannelType, GuildBasedChannel } from 'discord.js';
+import { ChannelType, Guild, GuildBasedChannel } from 'discord.js';
 
 // 환영메시지 보낼 채널 탐색하기
-function findWelcomeChannel(guild): GuildBasedChannel | undefined {
+function findWelcomeChannel(guild: Guild): GuildBasedChannel | undefined {
     // 시스템 채널 탐색
     if (guild.systemChannel) {
         return guild.systemChannel;
