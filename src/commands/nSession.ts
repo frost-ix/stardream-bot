@@ -13,7 +13,7 @@ module.exports = {
 
         try {
             const response = await axios.get(
-                `${process.env.CHZZK_API_PATH}/session/connections`,
+                `${process.env.CHZZK_OPEN_API_DOMAIN}/session/connections`,
                 {
                     headers: header,
                 }
