@@ -8,7 +8,7 @@ module.exports = {
   async execute(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return;
     await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
-    await interaction.reply(
+    await interaction.editReply(
       "# 안녕하세요 ! 스타드림 봇 입니다." +
         "\n\n" +
         "## 이 봇은 스타드림 멤버들의 방송 상태를 3분 간격으로 확인해요.\n\n" +

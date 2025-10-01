@@ -14,7 +14,6 @@ module.exports = {
   // execute(interaction, client) 형태로 client를 받습니다.
   async execute(interaction: Interaction, client: CustomClient) {
     if (!interaction.isChatInputCommand()) return;
-    await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
 
     const key = (interaction.guildId ?? interaction.channelId) + (interaction.options.getString('이름') || 'ALL');
     if (!client.backgroundIntervals) client.backgroundIntervals = new Map() as Map<string, NodeJS.Timeout>;
@@ -30,12 +29,15 @@ module.exports = {
       console.log('Stopping background check for', key);
       client.backgroundIntervals.delete(key);
       client.backgroundLastStatus.delete(key);
-      await interaction.reply({ content: `✅ ${memberNameRaw ? `[${memberNameRaw}]` : '전체'} 백그라운드 상태 체크를 중지했습니다.` });
+
+      await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
+      await interaction.editReply({ content: `✅ ${memberNameRaw ? `[${memberNameRaw}]` : '전체'} 백그라운드 상태 체크를 중지했습니다.` });
       return;
     }
 
     const channel: TextChannel = interaction.channel as TextChannel;
     if (!channel || !channel.send) {
+      await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
       await interaction.reply({ content: '❌ 이 명령어를 실행할 수 있는 채널 정보가 없습니다.' });
       return;
     }
@@ -44,6 +46,7 @@ module.exports = {
     const lastStatusMap = client.backgroundLastStatus;
 
     const runCheck = async () => {
+      await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
         try {
           if (memberName) {
             // 단일 멤버만 체크
