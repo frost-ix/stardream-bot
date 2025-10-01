@@ -28,15 +28,19 @@ function isOn(channelId, memberName, liveStatus) {
 
 function convertName(name: string) : string | null {
     switch (name) {
-        case '루네':
+      case '루네':
+      case '이루네':
             return 'irn';
-        case '하얀':
+      case '하얀':
+      case '온하얀':
             return 'ohy';
-        case '레이':
+      case '레이':
+      case '유레이':
             return 'uri';
-        case '나빈':
+      case '나빈':
+      case '하나빈':
             return 'hnv';
-        default:
+      default:
             return null;
     }
 }
