@@ -10,7 +10,6 @@ module.exports = {
     if (!interaction.isChatInputCommand()) return;
     console.log(`Current WebSocket ping: ${interaction.client.ws.ping}ms`);
 
-    await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
     checkPerformance(interaction);
     await interaction.editReply(
       "# 안녕하세요 ! 스타드림 봇 입니다." +

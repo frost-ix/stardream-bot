@@ -9,7 +9,6 @@ module.exports = {
     .setDescription("치지직 세션 연결을 시도합니다."),
   async execute(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return;
-    await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
     await interaction.editReply("치지직 세션 연결을 시도합니다...");
 
     try {

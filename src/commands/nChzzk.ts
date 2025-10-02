@@ -16,8 +16,6 @@ module.exports = {
     if (!interaction.isChatInputCommand()) return;
     console.log(`Current WebSocket ping: ${interaction.client.ws.ping}ms`);
 
-    await interaction.deferReply();
-
     const key = (interaction.guildId ?? interaction.channelId) + (interaction.options.getString('이름') || 'ALL');
     if (!client.backgroundIntervals) client.backgroundIntervals = new Map() as Map<string, NodeJS.Timeout>;
     if (!client.backgroundLastStatus) client.backgroundLastStatus = new Map() as Map<string, 'OPEN' | 'CLOSE'>;

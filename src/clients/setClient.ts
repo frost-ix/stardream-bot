@@ -110,6 +110,7 @@ class Bot {
 
         try {
           // deferReply는 각 커맨드에서 필요에 따라 호출하도록 변경합니다.
+          await interaction.deferReply();
           await command.execute(interaction, this.client);
         } catch (error) {
           console.error(
