@@ -9,7 +9,7 @@ module.exports = {
     .setDescription("치지직 세션 연결을 시도합니다."),
   async execute(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return;
-    await interaction.editReply("치지직 세션 연결을 시도합니다...");
+    await interaction.followUp("치지직 세션 연결을 시도합니다...");
 
     try {
       const response = await axios.get(

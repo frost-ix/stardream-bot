@@ -11,7 +11,7 @@ module.exports = {
     console.log(`Current WebSocket ping: ${interaction.client.ws.ping}ms`);
 
     checkPerformance(interaction);
-    await interaction.editReply(
+    await interaction.followUp(
       "# 안녕하세요 ! 스타드림 봇 입니다." +
         "\n\n" +
         "## 이 봇은 스타드림 멤버들의 방송 상태를 3분 간격으로 확인해요.\n\n" +
