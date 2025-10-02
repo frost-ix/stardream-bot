@@ -11,7 +11,6 @@ module.exports = {
     .addStringOption((option) =>
       option.setName('이름').setDescription('상태를 확인할 멤버의 이름을 입력하세요.')
   ),
-  // execute(interaction, client) 형태로 client를 받습니다.
   async execute(interaction: Interaction, client: CustomClient) {
     if (!interaction.isChatInputCommand()) return;
     console.log(`Current WebSocket ping: ${interaction.client.ws.ping}ms`);
@@ -30,19 +29,19 @@ module.exports = {
       client.backgroundIntervals.delete(key);
       client.backgroundLastStatus.delete(key); // 상태 정보도 삭제
 
-      await interaction.followUp({ content: `✅ ${memberNameRaw ? `[${memberNameRaw}]` : '전체'} 백그라운드 상태 체크를 중지했습니다.` });
+      await interaction.reply({ content: `✅ ${memberNameRaw ? `[${memberNameRaw}]` : '전체'} 백그라운드 상태 체크를 중지했습니다.` });
       return;
     }
 
     // Interval을 새로 시작하는 경우
     const channel: TextChannel = interaction.channel as TextChannel;
     if (!channel || !channel.send) {
-      await interaction.followUp({ content: '❌ 이 명령어를 실행할 수 있는 채널 정보가 없습니다.' });
+      await interaction.reply({ content: '❌ 이 명령어를 실행할 수 있는 채널 정보가 없습니다.' });
       return;
     }
 
     // 사용자에게 Interval 시작을 알림
-    await interaction.followUp({ content: `▶️ ${memberNameRaw ? `[${memberNameRaw}]` : '전체'} 백그라운드 상태 체크를 시작했습니다. 3분마다 상태 변경을 감지합니다.` });
+    await interaction.reply({ content: `▶️ ${memberNameRaw ? `[${memberNameRaw}]` : '전체'} 백그라운드 상태 체크를 시작했습니다. 3분마다 상태 변경을 감지합니다.` });
 
     const lastStatusMap = client.backgroundLastStatus;
 

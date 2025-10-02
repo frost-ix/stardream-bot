@@ -109,10 +109,6 @@ class Bot {
         }
 
         try {
-          // deferReply는 각 커맨드에서 필요에 따라 호출하도록 변경합니다.
-          await interaction.deferReply({ ephemeral: true }).catch(() => {
-            /* 이미 응답했거나 시간이 오래 걸리지 않는 경우 무시 */
-          });
           await command.execute(interaction, this.client);
         } catch (error) {
           console.error(
@@ -120,7 +116,7 @@ class Bot {
             error
           );
           if (interaction.replied || interaction.deferred) {
-            await interaction.followUp({
+            await interaction.reply({
               content: "There was an error while executing this command!",
               ephemeral: true,
             });

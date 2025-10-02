@@ -2,14 +2,13 @@ import { Interaction, SlashCommandBuilder } from "discord.js";
 import { header } from "../config/header.js";
 import axios from "axios";
 
-// 치지직 세션연결을 한 뒤 채팅 메시지를 조회 하는 슬래시 커맨드를 구현
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("공사중")
     .setDescription("치지직 세션 연결을 시도합니다."),
   async execute(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return;
-    await interaction.followUp("치지직 세션 연결을 시도합니다...");
+    await interaction.reply("치지직 세션 연결을 시도합니다...");
 
     try {
       const response = await axios.get(
