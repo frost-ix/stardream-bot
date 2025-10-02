@@ -12,6 +12,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { findWelcomeChannel } from "../functions/general.js";
+import { checkPerformance } from "../functions/perf.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -42,7 +43,7 @@ class Bot {
       .readdirSync(commandsPath)
       .filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
 
-    for (const file of commandFiles) {
+    commandFiles.forEach(async (file) => {
       const filePath = path.join(commandsPath, file);
       try {
         const { default: command } = await import(filePath);
@@ -57,10 +58,10 @@ class Bot {
       } catch (error) {
         console.error(`Error loading command at ${filePath}:`, error);
       }
-    }
+    });
   }
 
-  private registerEvents() {
+  private async registerEvents() {
     this.client.once(Events.ClientReady, (c) => {
       console.log(`Ready! Logged in as ${c.user.tag}`);
     });
@@ -92,6 +93,7 @@ class Bot {
       Events.InteractionCreate,
       async (interaction: Interaction) => {
         if (!interaction.isChatInputCommand()) return;
+        checkPerformance(interaction);
 
         const command = this.client.commands.get(interaction.commandName);
 
@@ -137,7 +139,7 @@ class Bot {
     }
 
     await this.loadCommands();
-    this.registerEvents();
+    await this.registerEvents();
 
     try {
       console.log("Starting bot...");
@@ -152,6 +154,12 @@ class Bot {
           }
         );
         console.log("Successfully registered application (/) commands.");
+        const perf = performance.now();
+        console.log(
+          `Processing time until now: ${(performance.now() - perf).toFixed(
+            2
+          )}ms`
+        );
       }
     } catch (error) {
       console.error("Error during bot startup:", error);

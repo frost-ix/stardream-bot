@@ -2,6 +2,7 @@ import { EmbedBuilder, Interaction, SlashCommandBuilder, TextChannel } from 'dis
 import { CustomClient } from '../types/customClient.js';
 import { checkChannelStatus, checkChannelInformation, convertName, StreamerKey } from '../functions/nChzzkFunction.js';
 import streamers from '../data/streamers.json' with { type: 'json' };
+import { checkPerformance } from '../functions/perf.js';
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,6 +14,8 @@ module.exports = {
   // execute(interaction, client) 형태로 client를 받습니다.
   async execute(interaction: Interaction, client: CustomClient) {
     if (!interaction.isChatInputCommand()) return;
+    console.log(`Current WebSocket ping: ${interaction.client.ws.ping}ms`);
+
     await interaction.deferReply();
 
     const key = (interaction.guildId ?? interaction.channelId) + (interaction.options.getString('이름') || 'ALL');
@@ -123,6 +126,8 @@ module.exports = {
         console.error('Error during scheduled status check:', error);
       }
     };
+
+    checkPerformance(interaction);
 
     runCheck(); // 시작 시 1회 즉시 실행
     const intervalId = setInterval(runCheck, 3 * 60 * 1000); // 3분마다 실행

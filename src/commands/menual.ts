@@ -1,5 +1,6 @@
 // 여기서 nChzzk.ts의 사용 방법을 알려주는 slash command를 구현합니다.
 import { Interaction, SlashCommandBuilder } from "discord.js";
+import { checkPerformance } from "../functions/perf.js";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -7,7 +8,10 @@ module.exports = {
     .setDescription("스티드림 봇 사용 방법을 안내합니다."),
   async execute(interaction: Interaction) {
     if (!interaction.isChatInputCommand()) return;
+    console.log(`Current WebSocket ping: ${interaction.client.ws.ping}ms`);
+
     await interaction.deferReply(); // 응답 시간이 오래 걸릴 수 있으므로 deferReply 사용
+    checkPerformance(interaction);
     await interaction.editReply(
       "# 안녕하세요 ! 스타드림 봇 입니다." +
         "\n\n" +
