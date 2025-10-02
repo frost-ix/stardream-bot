@@ -37,7 +37,7 @@ module.exports = {
       yureiButton,
       hanabinButton
     );
-    await interaction.reply({
+    await interaction.followUp({
       content: "스티드림 멤버들의 X(구 트위터) 링크는 다음과 같습니다:",
       components: [buttonRow],
     });
