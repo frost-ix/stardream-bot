@@ -2,7 +2,7 @@ import { Interaction, SlashCommandBuilder } from "discord.js";
 import { header } from "../config/header.js";
 import axios from "axios";
 
-module.exports = {
+const build = {
   data: new SlashCommandBuilder()
     .setName("공사중")
     .setDescription("치지직 세션 연결을 시도합니다."),
