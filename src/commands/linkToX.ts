@@ -6,7 +6,7 @@ import {
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("X 링크")
+    .setName("X링크")
     .setDescription("스티드림 멤버들의 X(구 트위터) 링크를 안내합니다."),
   async execute(interaction: any) {
     if (!interaction.isChatInputCommand()) return;
