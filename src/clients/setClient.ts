@@ -107,7 +107,6 @@ class Bot {
       const isAdmin = developerId === ADMIN_USER_ID;
 
       if (isAdmin) {
-        // 3. "pong!"이라고 답장합니다.
         try {
           if (message.content.length < 4) {
             console.log("전송 할 내용이 짧습니다.");

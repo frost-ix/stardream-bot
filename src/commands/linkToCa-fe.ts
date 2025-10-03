@@ -1,9 +1,9 @@
 import {
   ActionRowBuilder,
   ButtonBuilder,
-  Interaction,
   SlashCommandBuilder,
 } from "discord.js";
+import { checkPerformance } from "../functions/perf.js";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -13,6 +13,7 @@ module.exports = {
     ),
   async execute(interaction: any) {
     if (!interaction.isChatInputCommand()) return;
+    checkPerformance(interaction);
     const starDreamCoButton = new ButtonBuilder()
       .setLabel("스타드림 공식 네이버 카페 바로가기")
       .setStyle(5) // Link style

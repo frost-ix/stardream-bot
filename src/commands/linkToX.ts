@@ -3,6 +3,7 @@ import {
   ButtonBuilder,
   SlashCommandBuilder,
 } from "discord.js";
+import { checkPerformance } from "../functions/perf.js";
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -10,6 +11,7 @@ module.exports = {
     .setDescription("스티드림 멤버들의 X(구 트위터) 링크를 안내합니다."),
   async execute(interaction: any) {
     if (!interaction.isChatInputCommand()) return;
+    checkPerformance(interaction);
     const starDreamCoButton = new ButtonBuilder()
       .setLabel("스타드림 공식 X 계정 바로가기")
       .setStyle(5) // Link style
