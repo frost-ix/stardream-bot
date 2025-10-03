@@ -95,6 +95,11 @@ class Bot {
 
     this.client.on(Events.MessageCreate, async (message) => {
       if (message.author.bot) return;
+      if (!message.content.startsWith("!공지 ")) return;
+      if (!ADMIN_USER_ID) {
+        console.error("ADMIN_USER_ID is not set in the environment variables.");
+        return;
+      }
 
       console.log(`📢 관리자 공지 시작: "${message.content}"`);
 
