@@ -1,4 +1,5 @@
 import {
+  ChannelType,
   Client,
   Collection,
   Events,
@@ -6,17 +7,19 @@ import {
   Interaction,
   Partials,
   Routes,
+  TextChannel,
 } from "discord.js";
 import { CustomClient, Command } from "../types/customClient.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { findWelcomeChannel } from "../functions/general.js";
-import { checkPerformance } from "../functions/perf.js";
+import { replaceAnouncement } from "../functions/notice.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const ADMIN_USER_ID = process.env.DISCORD_BOT_ADMIN_ID;
 const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 
 class Bot {
@@ -35,6 +38,7 @@ class Bot {
     this.client.commands = new Collection<string, Command>();
     this.client.backgroundIntervals = new Map<string, NodeJS.Timeout>();
     this.client.backgroundLastStatus = new Map<string, "OPEN" | "CLOSE">();
+    this.client.runningCommands = new Set<string>();
   }
 
   private async loadCommands() {
@@ -89,13 +93,83 @@ class Bot {
       }
     });
 
+    this.client.on(Events.MessageCreate, async (message) => {
+      if (message.author.bot) return;
+
+      console.log(`📢 관리자 공지 시작: "${message.content}"`);
+
+      const developerId = message.author.globalName + message.author.id;
+      const isAdmin = developerId === ADMIN_USER_ID;
+
+      if (isAdmin) {
+        // 3. "pong!"이라고 답장합니다.
+        try {
+          if (message.content.length < 4) {
+            console.log("전송 할 내용이 짧습니다.");
+            return;
+          }
+          const announcement = replaceAnouncement(message.content);
+
+          // 이 봇이 속한 모든 서버에게 최상단 채널에 announcement를 보냅니다.
+          const guilds = this.client.guilds.cache;
+          console.log(`📢 공지사항을 ${guilds.size}개의 서버에 보냅니다.`);
+          console.log(`📢 공지 내용 --\n${announcement}`);
+          console.log(guilds.map((g) => g.name).join(", "));
+
+          guilds.forEach(async (guild) => {
+            try {
+              const channels = await guild.channels.fetch();
+              const textChannels = channels.filter(
+                (channel) =>
+                  channel!.type === ChannelType.GuildText &&
+                  channel!.permissionsFor(guild.members.me!).has("SendMessages")
+              ) as Collection<string, TextChannel>;
+
+              // 가장 먼저 찾은 텍스트 채널에 공지사항을 보냅니다.
+              const firstTextChannel = textChannels.first();
+              if (firstTextChannel) {
+                await firstTextChannel.send(announcement!);
+                console.log(
+                  `📢 공지사항을 ${guild.name} 서버의 #${firstTextChannel.name} 채널에 보냈습니다.`
+                );
+              } else {
+                console.log(
+                  `⚠️ ${guild.name} 서버에 메시지를 보낼 수 있는 텍스트 채널이 없습니다.`
+                );
+              }
+            } catch (error) {
+              console.error(
+                `⚠️ ${guild.name} 서버에 공지사항을 보내는 데 실패했습니다:`,
+                error
+              );
+            }
+          });
+
+          await message.reply("모든 서버에 공지사항을 보냈습니다.");
+
+          console.log("📢 관리자 공지 완료");
+        } catch (error) {
+          console.error("답장을 보내는 데 실패했습니다:", error);
+        }
+      }
+    });
+
     this.client.on(
       Events.InteractionCreate,
       async (interaction: Interaction) => {
         if (!interaction.isChatInputCommand()) return;
-        checkPerformance(interaction);
 
         const command = this.client.commands.get(interaction.commandName);
+        const commandIdentifier = `${interaction.guildId}-${interaction.commandName}-${interaction.user.id}`;
+
+        if (this.client.runningCommands.has(commandIdentifier)) {
+          await interaction.reply({
+            content:
+              "이전 명령어가 아직 실행 중입니다. 잠시 후 다시 시도해주세요.",
+            ephemeral: true,
+          });
+          return;
+        }
 
         if (!command) {
           console.error(
@@ -108,6 +182,8 @@ class Bot {
           return;
         }
 
+        this.client.runningCommands.add(commandIdentifier);
+
         try {
           await command.execute(interaction, this.client);
         } catch (error) {
@@ -116,7 +192,7 @@ class Bot {
             error
           );
           if (interaction.replied || interaction.deferred) {
-            await interaction.reply({
+            await interaction.followUp({
               content: "There was an error while executing this command!",
               ephemeral: true,
             });
@@ -126,6 +202,8 @@ class Bot {
               ephemeral: true,
             });
           }
+        } finally {
+          this.client.runningCommands.delete(commandIdentifier);
         }
       }
     );
