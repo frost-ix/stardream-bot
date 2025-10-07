@@ -15,6 +15,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { findWelcomeChannel } from "../functions/general.js";
 import { replaceAnouncement } from "../functions/notice.js";
+import { BotState } from "../types/intervalInfo.js";
+import { loadState } from "../functions/nChzzkPersistance.js";
+import notices from "../data/notices.json" with { type: "json" };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,6 +42,7 @@ class Bot {
     this.client.backgroundIntervals = new Map<string, NodeJS.Timeout>();
     this.client.backgroundLastStatus = new Map<string, "OPEN" | "CLOSE">();
     this.client.runningCommands = new Set<string>();
+    this.client.activeIntervalsInfo = new Map<string, BotState>();
   }
 
   private async loadCommands() {
@@ -66,8 +70,48 @@ class Bot {
   }
 
   private async registerEvents() {
-    this.client.once(Events.ClientReady, (c) => {
+    this.client.once(Events.ClientReady, async (c) => {
       console.log(`Ready! Logged in as ${c.user.tag}`);
+      loadState(this.client);
+
+      const noticeMessage = notices.notices.find((n) => n.id === "restart-complete")!;
+      const restartMessage = noticeMessage.title + noticeMessage.content;
+      const guilds = this.client.guilds.cache;
+      console.log(`📢 재시작 안내를 ${guilds.size}개의 서버에 보냅니다.`);
+
+      for (const guild of guilds.values()) {
+        try {
+          let channelToSend: TextChannel | null = findWelcomeChannel(
+            guild
+          ) as TextChannel;
+
+          if (
+            !channelToSend &&
+            guild.systemChannel &&
+            guild.systemChannel
+              .permissionsFor(guild.members.me!)
+              .has("SendMessages")
+          ) {
+            channelToSend = guild.systemChannel;
+          }
+
+          if (channelToSend) {
+            await channelToSend.send(restartMessage);
+            console.log(
+              `✅ ${guild.name} 서버의 #${channelToSend.name} 채널에 재시작 안내를 보냈습니다.`
+            );
+          } else {
+            console.log(
+              `⚠️ ${guild.name} 서버에 메시지를 보낼 적절한 채널을 찾지 못했습니다.`
+            );
+          }
+        } catch (error) {
+          console.error(
+            `❌ ${guild.name} 서버에 재시작 안내를 보내는 데 실패했습니다:`,
+            error
+          );
+        }
+      }
     });
 
     this.client.on(Events.Error, (error) => {
