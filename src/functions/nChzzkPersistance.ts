@@ -111,10 +111,16 @@ function restartInterval(client: CustomClient, info: IntervalInfo) {
         console.log(`Interval for key ${info.key} is already running.`);
         return;
     }
+    // 재시작 됐을 때 Node 안에 남아있는 Interval이 있으면 제거
+    if (client.backgroundIntervals.get(info.key)) {
+        clearInterval(client.backgroundIntervals.get(info.key)!);
+    }
+
     const { key, channelId, userId, memberNameRaw } = info;
     const memberName: StreamerKey | "ALL" = memberNameRaw ? convertName(memberNameRaw) as StreamerKey : "ALL";
 
     const runCheck = async () => {
+        console.log(`🔄 Restarted interval check for key ${key} at ${new Date().toISOString()}`);
         const channel = await client.channels.fetch(channelId) as TextChannel;
         if (!channel) {
             console.error(`Could not find channel ${channelId} to restart interval.`);

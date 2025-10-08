@@ -3,7 +3,7 @@ import { CustomClient } from '../types/customClient.js';
 import { checkChannelStatus, convertName, StreamerKey, setEmbedBuilder } from '../functions/nChzzkFunction.js';
 import { checkPerformance } from '../functions/perf.js';
 import streamers from '../data/streamers.json' with { type: 'json' };
-import { loadState, saveState } from '../functions/nChzzkPersistance.js';
+import { saveState } from '../functions/nChzzkPersistance.js';
 import { BotState, IntervalInfo } from '../types/intervalInfo.js';
 
 module.exports = {
@@ -63,6 +63,7 @@ module.exports = {
     const lastStatusMap = client.backgroundLastStatus;
 
     const runCheck = async () => {
+      console.log(`🔄 Running scheduled check for key ${key} at ${new Date().toISOString()}`);
       try {
         if (memberName !== "ALL") {
           // 단일 멤버 체크
@@ -139,9 +140,6 @@ module.exports = {
     };
 
     const lastStatus = memberName !== "ALL" ? (lastStatusMap.get(key) || 'CLOSE') : 'CLOSE';
-
-    console.log("status:", lastStatusMap);
-
     const lastStatusEntries = lastStatusMap.entries();
 
     const botState: BotState = {
@@ -153,8 +151,6 @@ module.exports = {
         },
       }
     };
-
-    console.log("botState:", botState);
 
     client.activeIntervalsInfo.set(userId, botState);
     saveState(client, userId, memberName);
