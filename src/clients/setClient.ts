@@ -13,7 +13,7 @@ import { CustomClient, Command } from "../types/customClient.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { findWelcomeChannel } from "../functions/general.js";
+import { createTextChannel, findWelcomeChannel } from "../functions/general.js";
 import { replaceAnouncement } from "../functions/notice.js";
 import { BotState } from "../types/intervalInfo.js";
 import { loadState } from "../functions/nChzzkPersistance.js";
@@ -23,7 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ADMIN_USER_ID = process.env.DISCORD_BOT_ADMIN_ID;
-const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
+const DISCORD_TOKEN = process.env.DISCORD_DEV_TOKEN;
 
 class Bot {
   private client: CustomClient;
@@ -118,7 +118,8 @@ class Bot {
       console.error("The client encountered an error:", error);
     });
 
-    this.client.on("guildCreate", (guild) => {
+    this.client.on("guildCreate", async (guild) => {
+      await createTextChannel(guild);
       const welcomeChannel = findWelcomeChannel(guild);
       console.log(`Joined a new guild: ${guild.name} (id: ${guild.id})`);
 
@@ -127,9 +128,14 @@ class Bot {
           .send(
             "안녕하세요! 스타드림 뱅온 알리미 봇 입니다.\n" +
               "잘 부탁드립니다! 🚀\n\n" +
-              "봇 사용 방법은 **`/사용방법`** 명령어를 통해 확인하실 수 있습니다."
+              "각 명령어 별 채널이 생성 됩니다 !\n" +
+              "해당 채널에서 명령어를 사용하시면 됩니다.\n" +
+              "봇 사용 방법은 **`/사용방법`** 명령어를 통해 확인하실 수 있습니다.\n"
           )
           .catch(console.error);
+        console.log(
+          `Sent a welcome message to ${guild.name} in #${welcomeChannel.name}.`
+        );
       } else {
         console.log(
           `Could not find a suitable channel to send a welcome message in ${guild.name}.`
