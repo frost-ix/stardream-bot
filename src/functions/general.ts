@@ -25,6 +25,16 @@ function findWelcomeChannel(guild: Guild): GuildBasedChannel | undefined {
   );
 }
 
+function findChannel(
+  guild: Guild,
+  channelName: string,
+  channelType: ChannelType
+): GuildBasedChannel | undefined {
+  return guild.channels.cache.find(
+    (channel) => channel.name === channelName && channel.type === channelType
+  );
+}
+
 async function createTextChannel(guild: Guild) {
   const categoryAlarm = await guild.channels.create({
     name: "뱅온-알리미",
@@ -62,21 +72,21 @@ async function createTextChannel(guild: Guild) {
     }),
   ]);
 
-  const generalChannel = guild.channels.cache.find(
-    (channel) =>
-      channel.name === "일반" && channel.type === ChannelType.GuildText
+  const generalChannel = findChannel(guild, "일반", ChannelType.GuildText);
+  const generalChannelVoice = findChannel(
+    guild,
+    "일반",
+    ChannelType.GuildVoice
   );
-  const generalChannelVoice = guild.channels.cache.find(
-    (channel) =>
-      channel.name === "일반" && channel.type === ChannelType.GuildVoice
+  const generalChannelTextCategory = findChannel(
+    guild,
+    "채팅 채널",
+    ChannelType.GuildCategory
   );
-  const generalChannelTextCategory = guild.channels.cache.find(
-    (channel) =>
-      channel.name === "채팅 채널" && channel.type === ChannelType.GuildCategory
-  );
-  const generalChannelVoiceCategory = guild.channels.cache.find(
-    (channel) =>
-      channel.name === "음성 채널" && channel.type === ChannelType.GuildCategory
+  const generalChannelVoiceCategory = findChannel(
+    guild,
+    "음성 채널",
+    ChannelType.GuildCategory
   );
 
   if (
