@@ -126,6 +126,12 @@ function restartInterval(client: CustomClient, info: IntervalInfo) {
             console.error(`Could not find channel ${channelId} to restart interval.`);
             clearInterval(client.backgroundIntervals.get(key));
             client.backgroundIntervals.delete(key);
+            client.backgroundLastStatus.forEach((_, k) => {
+                if (k.startsWith(key)) {
+                    client.backgroundLastStatus.delete(k);
+                }
+            });
+            client.backgroundLastStatusRaw.delete(key);
             client.activeIntervalsInfo.delete(key);
             return;
         }
@@ -135,9 +141,10 @@ function restartInterval(client: CustomClient, info: IntervalInfo) {
                 const streamerInfo = streamers.stardream[memberName];
                 if (!streamerInfo) return;
                 const liveStatus = await checkChannelStatus(streamerInfo.id);
-                const prev = client.backgroundLastStatus.get(key);
+                const prevStatus = client.backgroundLastStatusRaw
+                const prev = prevStatus.get(key);
                 if (prev !== liveStatus) {
-                    client.backgroundLastStatus.set(key, liveStatus);
+                    client.backgroundLastStatusRaw.set(key, liveStatus);
                     if (liveStatus === 'OPEN') {
                         const embedLive = await setEmbedBuilder(streamerInfo.id, streamerInfo.name);
                         channel.send({ content: `🔔 <@${userId}>님, [${streamerInfo.name}]님의 방송이 시작되었습니다!`, embeds: [embedLive] });

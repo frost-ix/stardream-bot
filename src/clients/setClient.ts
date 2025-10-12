@@ -23,7 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ADMIN_USER_ID = process.env.DISCORD_BOT_ADMIN_ID;
-const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
+const DISCORD_TOKEN = process.env.DISCORD_DEV_TOKEN;
 
 class Bot {
   private client: CustomClient;
@@ -41,6 +41,7 @@ class Bot {
     this.client.commands = new Collection<string, Command>();
     this.client.backgroundIntervals = new Map<string, NodeJS.Timeout>();
     this.client.backgroundLastStatus = new Map<string, "OPEN" | "CLOSE">();
+    this.client.backgroundLastStatusRaw = new Map<string, "OPEN" | "CLOSE">();
     this.client.runningCommands = new Set<string>();
     this.client.activeIntervalsInfo = new Map<string, BotState>();
   }

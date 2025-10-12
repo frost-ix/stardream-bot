@@ -2,7 +2,8 @@ import axios from 'axios';
 import { header, pollingHeader } from '../config/header.js';
 import { ApiResponse } from '../types/channels.js';
 import streamers from '../data/streamers.json' with { type: 'json' };
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, Interaction, TextChannel } from 'discord.js';
+import { CustomClient } from '../types/customClient.js';
 
 type StreamerKey = keyof typeof streamers.stardream;
 const CHZZK_CHANNELS_API_URL = `${process.env.CHZZK_API_PATH}/channels/`;
@@ -88,4 +89,69 @@ async function setEmbedBuilder(id: string, name: string) : Promise<EmbedBuilder>
         .addFields({ name: '채널 바로가기 (모바일)', value: `[치지직 모바일](https://m.chzzk.naver.com/live/${id})` })
         .setTimestamp();
 }
-export { checkChannelStatus, isOn, convertName, StreamerKey, setEmbedBuilder };
+
+async function runCheck(key: string, memberName: StreamerKey | "ALL", channel: TextChannel, interaction: Interaction, client: CustomClient, memberNameRaw: string) {
+    console.log(`🔄 Running scheduled check for key ${key} at ${new Date().toISOString()}`);
+      try {
+        if (memberName !== "ALL") {
+          // 단일 멤버 체크
+          const streamerInfo = JSON.parse(JSON.stringify(streamers.stardream[memberName]));
+          if (!streamerInfo) {
+            await channel.send(`❌ **[${memberNameRaw}]** 님은 목록에 없는 멤버입니다. (자동 체크 중지)`);
+            // Interval 중지
+            const intervalToStop = client.backgroundIntervals.get(key);
+            if (intervalToStop) {
+              clearInterval(intervalToStop);
+              client.backgroundIntervals.delete(key);
+              client.backgroundLastStatus.delete(key);
+            }
+            return;
+          }
+          
+          const liveStatus = await checkChannelStatus(streamerInfo.id);
+          const prevStatus = client.backgroundLastStatusRaw
+          const prev = prevStatus.get(key);
+
+          if (prev !== liveStatus) {
+            client.backgroundLastStatusRaw.set(key, liveStatus);
+            if (liveStatus === 'OPEN') {
+              const embedLive = await setEmbedBuilder(streamerInfo.id, streamerInfo.name);
+              channel.send({ content: `🔔 <@${interaction.user.id}>님, [${streamerInfo.name}]님의 방송이 시작되었습니다!`, embeds: [embedLive] });
+              console.log(`📡 방송 켜짐 알림 전송 완료 : ` + interaction.user.tag);
+            } else {
+              channel.send(`🌙 ${streamerInfo.name}님이 방송을 종료했습니다.`);
+              console.log(`📡 방송 종료 알림 전송 완료 : ` + interaction.user.tag);
+            }
+          }
+        } else {
+          // 전체 멤버 체크
+          const streamerGroup = JSON.parse(JSON.stringify(streamers.stardream));
+          for (const memberKey in streamerGroup) {
+            const { id, name } = streamerGroup[memberKey];
+            const memberKeyFull = key + memberKey;
+            
+            try {
+              const liveStatus = await checkChannelStatus(id);
+              const prev = client.backgroundLastStatus.get(memberKeyFull);
+
+              if (prev !== liveStatus) {
+                client.backgroundLastStatus.set(memberKeyFull, liveStatus);
+                if (liveStatus === 'OPEN') {
+                  const embedLive = await setEmbedBuilder(id, name);
+                  channel.send({ content: `🔔 <@${interaction.user.id}>님, [${name}]님의 방송이 시작되었습니다!`, embeds: [embedLive] });
+                  console.log(`📡 방송 켜짐 알림 전송 완료 : ` + interaction.user.tag);
+                } else {
+                  channel.send(`🌙 ${name}님이 방송을 종료했습니다.`);
+                  console.log(`📡 방송 종료 알림 전송 완료 : ` + interaction.user.tag);
+                }
+              }
+            } catch (error) {
+              console.error(`Error checking status for ${name}:`, error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error during scheduled status check:', error);
+      }
+}
+export { checkChannelStatus, isOn, convertName, StreamerKey, setEmbedBuilder, runCheck };

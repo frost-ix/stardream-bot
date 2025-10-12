@@ -10,9 +10,10 @@ export class CustomClient extends Client {
   commands: Collection<string, Command> = new Collection();
   runningCommands: Set<string> = new Set();
   activeIntervals: Map<string, NodeJS.Timeout> = new Map();
+  activeIntervalsInfo: Map<string, BotState> = new Map();
   backgroundIntervals: Map<string, NodeJS.Timeout> = new Map();
   backgroundLastStatus: Map<string, "OPEN" | "CLOSE"> = new Map();
-  activeIntervalsInfo: Map<string, BotState> = new Map();
+  backgroundLastStatusRaw: Map<string, "OPEN" | "CLOSE"> = new Map();
 }
 
 export interface Command {
