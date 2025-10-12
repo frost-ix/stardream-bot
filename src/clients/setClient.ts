@@ -23,7 +23,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const ADMIN_USER_ID = process.env.DISCORD_BOT_ADMIN_ID;
-const DISCORD_TOKEN = process.env.DISCORD_DEV_TOKEN;
+const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
 
 class Bot {
   private client: CustomClient;
