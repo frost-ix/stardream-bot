@@ -3,3 +3,9 @@ config.json
 .env
 /src/data
 env.d.ts
+*.yml
+*.yaml
+*.sh
+.DS_Store
+dist
+*.log
