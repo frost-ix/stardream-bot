@@ -181,8 +181,8 @@ class Bot {
               ) as Collection<string, TextChannel>;
 
               // 가장 먼저 찾은 텍스트 채널에 공지사항을 보냅니다.
-              const firstTextChannel = textChannels.first();
-              if (firstTextChannel) {
+              const firstTextChannel = findWelcomeChannel(guild)
+              if (firstTextChannel && firstTextChannel.isTextBased()) {
                 await firstTextChannel.send(announcement!);
                 console.log(
                   `📢 공지사항을 ${guild.name} 서버의 #${firstTextChannel.name} 채널에 보냈습니다.`
