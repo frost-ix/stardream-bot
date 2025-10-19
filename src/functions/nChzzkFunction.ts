@@ -2,8 +2,9 @@ import axios from 'axios';
 import { header, pollingHeader } from '../config/header.js';
 import { ApiResponse } from '../types/channels.js';
 import streamers from '../data/streamers.json' with { type: 'json' };
-import { EmbedBuilder, Interaction, TextChannel } from 'discord.js';
+import { EmbedBuilder, TextChannel } from 'discord.js';
 import { CustomClient } from '../types/customClient.js';
+import { UserInfo } from '../types/userInfo.js';
 
 type StreamerKey = keyof typeof streamers.stardream;
 const CHZZK_CHANNELS_API_URL = `${process.env.CHZZK_API_PATH}/channels/`;
@@ -56,6 +57,23 @@ function isOn(
     }
 }
 
+function filterCommands(input: string): boolean {
+  switch (input) {
+      case '루네':
+      case '이루네':
+      case '하얀':
+      case '온하얀':
+      case '레이':
+      case '유레이':
+      case '나빈':
+      case '하나빈':
+      case '':
+          return true;
+      default:
+          return false;
+  }
+}
+
 function convertName(name: string): StreamerKey | null {
     switch (name) {
         case '루네':
@@ -90,10 +108,10 @@ async function setEmbedBuilder(id: string, name: string) : Promise<EmbedBuilder>
         .setTimestamp();
 }
 
-async function runCheck(key: string, memberName: StreamerKey | "ALL", channel: TextChannel, interaction: Interaction, client: CustomClient, memberNameRaw: string) {
+async function runCheck(key: string, memberName: StreamerKey | "ALL", channel: TextChannel, info: UserInfo, client: CustomClient, memberNameRaw: string) {
     console.log(`🔄 Running scheduled check for key ${key} at ${new Date().toISOString()}`);
       try {
-        if (memberName !== "ALL") {
+        if (memberName !== "ALL" && memberName) {
           // 단일 멤버 체크
           const streamerInfo = JSON.parse(JSON.stringify(streamers.stardream[memberName]));
           if (!streamerInfo) {
@@ -116,11 +134,11 @@ async function runCheck(key: string, memberName: StreamerKey | "ALL", channel: T
             client.backgroundLastStatusRaw.set(key, liveStatus);
             if (liveStatus === 'OPEN') {
               const embedLive = await setEmbedBuilder(streamerInfo.id, streamerInfo.name);
-              channel.send({ content: `🔔 <@${interaction.user.id}>님, [${streamerInfo.name}]님의 방송이 시작되었습니다!`, embeds: [embedLive] });
-              console.log(`📡 방송 켜짐 알림 전송 완료 : ` + interaction.user.tag);
+              await channel.send({ content: `🔔 <@${info.userId}>님, [${streamerInfo.name}]님의 방송이 시작되었습니다!`, embeds: [embedLive] });
+              console.log(`📡 방송 켜짐 알림 전송 완료 : ` + info.userTag);
             } else {
-              channel.send(`🌙 ${streamerInfo.name}님이 방송을 종료했습니다.`);
-              console.log(`📡 방송 종료 알림 전송 완료 : ` + interaction.user.tag);
+              await channel.send(`🌙 ${streamerInfo.name}님이 방송을 종료했습니다.`);
+              console.log(`📡 방송 종료 알림 전송 완료 : ` + info.userTag);
             }
           }
         } else {
@@ -138,11 +156,11 @@ async function runCheck(key: string, memberName: StreamerKey | "ALL", channel: T
                 client.backgroundLastStatus.set(memberKeyFull, liveStatus);
                 if (liveStatus === 'OPEN') {
                   const embedLive = await setEmbedBuilder(id, name);
-                  channel.send({ content: `🔔 <@${interaction.user.id}>님, [${name}]님의 방송이 시작되었습니다!`, embeds: [embedLive] });
-                  console.log(`📡 방송 켜짐 알림 전송 완료 : ` + interaction.user.tag);
+                  await channel.send({ content: `🔔 <@${info.userId}>님, [${name}]님의 방송이 시작되었습니다!`, embeds: [embedLive] });
+                  console.log(`📡 방송 켜짐 알림 전송 완료 : ` + info.userTag);
                 } else {
-                  channel.send(`🌙 ${name}님이 방송을 종료했습니다.`);
-                  console.log(`📡 방송 종료 알림 전송 완료 : ` + interaction.user.tag);
+                  await channel.send(`🌙 ${name}님이 방송을 종료했습니다.`);
+                  console.log(`📡 방송 종료 알림 전송 완료 : ` + info.userTag);
                 }
               }
             } catch (error) {
@@ -150,8 +168,9 @@ async function runCheck(key: string, memberName: StreamerKey | "ALL", channel: T
             }
           }
         }
+        
       } catch (error) {
         console.error('Error during scheduled status check:', error);
       }
 }
-export { checkChannelStatus, isOn, convertName, StreamerKey, setEmbedBuilder, runCheck };
+export { checkChannelStatus, isOn, filterCommands,convertName, StreamerKey, setEmbedBuilder, runCheck };

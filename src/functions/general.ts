@@ -15,14 +15,14 @@ function findWelcomeChannel(guild: Guild): GuildBasedChannel | undefined {
   );
   if (generalChannel) {
     return generalChannel;
+  } else {
+    // 최상단 채널 탐색
+    return guild.channels.cache.find(
+      (channel) =>
+        channel.type === ChannelType.GuildText &&
+        channel.permissionsFor(guild.members.me!).has("SendMessages")
+    );
   }
-
-  // 최상단 채널 탐색
-  return guild.channels.cache.find(
-    (channel) =>
-      channel.type === ChannelType.GuildText &&
-      channel.permissionsFor(guild.members.me!).has("SendMessages")
-  );
 }
 
 function findChannel(
