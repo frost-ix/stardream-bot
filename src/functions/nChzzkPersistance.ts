@@ -69,9 +69,14 @@ export function saveState(
           };
         }
         if (memberName === "ALL") {
+          const filteredLastStatus = Array.from(lastStatus.entries()).filter(
+            (entry) => {
+              return intervalRaw.some(r => entry[0].startsWith(r.key));
+            }
+          );
           existingState[userId].intervals.raw.push(...intervalRaw);
-          existingState[userId].lastStatus[memberName] = lastStatus
-            ? Object.fromEntries(lastStatus)
+          existingState[userId].lastStatus[memberName] = filteredLastStatus
+            ? Object.fromEntries(filteredLastStatus)
             : {};
         } else {
           const internalRawFind = intervalRaw.find(
